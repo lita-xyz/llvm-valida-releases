@@ -19,7 +19,9 @@ docker run --platform linux/amd64 --entrypoint=/bin/bash -it --rm -v $(realpath 
 
 # Usage instructions
 
-## Entering the Valida shell
+## Entering the Valida shell (non-Docker only)
+
+**This step applies only if you are using a non-Docker installation of the toolchain.**
 
 Upon having installed the toolchain, the Valida shell should be on your `PATH`, and if you run `which valida-shell`, you should see:
 
@@ -48,7 +50,7 @@ $ git clone https://github.com/lita-xyz/fibonacci.git
 $ cd fibonacci
 ```
 
-3. Enter the Valida shell:
+3. Enter the Valida shell (skip this step if you are using the Docker toolchain):
 
 ```bash
 $ valida-shell
@@ -117,6 +119,8 @@ To enter the Valida shell, run:
 ```bash
 valida-shell
 ```
+
+**You can skip the above step if you are using the Docker toolchain.**
 
 See [the lita-xyz/valida-c-examples repo on Github](https://github.com/lita-xyz/valida-c-examples) for some examples of C programs which can be compiled and run on Valida. Here is an example C program from this repo, called `cat.c`:
 
