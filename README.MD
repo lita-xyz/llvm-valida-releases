@@ -5,14 +5,34 @@ See 'Releases' section for downloads.
 We provide a Docker container with the Valida LLVM and Rust toolchains already installed.
 Docker is the only supported method of running on platforms other than x86 Linux.
 
+### x86_64-based platforms
+
+To install and use the toolchain via Docker on a 64-bit computer with an Intel-compatible chipset (x86_64), such as Intel- or AMD-based computers:
+
 ```bash
 # Download the container
-docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.5.0-alpha
+docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha-amd64
 
-cd your-valida-project
+# cd your-valida-project
 
 # Enter the container:
-docker run --platform linux/amd64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.5.0-alpha
+docker run --platform linux/amd64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha-amd64
+
+# You are now in a shell with the valida rust toolchain installed!
+```
+
+### ARM64-based platforms
+
+To install and use the toolchain via Docker on a 64-bit computer with an ARM64-compatible chipset (ARM64), such as Apple silicon-based computers:
+
+```bash
+# Download the container
+docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha
+
+# cd your-valida-project
+
+# Enter the container:
+docker run --platform linux/amd64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha
 
 # You are now in a shell with the valida rust toolchain installed!
 ```
@@ -41,25 +61,25 @@ For examples of how to build a Rust program which compiles and runs on Valida, s
 1. Clone the project template:
 
 ```bash
-$ git clone https://github.com/lita-xyz/fibonacci.git
+git clone https://github.com/lita-xyz/fibonacci.git
 ```
 
 2. `cd` into the project template:
 
 ```bash
-$ cd fibonacci
+cd fibonacci
 ```
 
 3. Enter the Valida shell (skip this step if you are using the Docker toolchain):
 
 ```bash
-$ valida-shell
+valida-shell
 ```
 
 4. Build the project:
 
 ```
-valida> cargo +valida build
+cargo +valida build
 ```
 
 5. Run the code (taking input from `stdin`):
@@ -77,7 +97,7 @@ valida> valida prove target/delendum-unknown-baremetal-gnu/debug/fibonacci proof
 7. Verify the proof:
 
 ```
-valida> valida verify target/delendum-unknown-baremetal-gnu/debug/fibonacci proof
+valida verify target/delendum-unknown-baremetal-gnu/debug/fibonacci proof
 ```
 
 ## Writing Rust programs to run on Valida
@@ -88,8 +108,6 @@ We do not (yet) support a main function signature that takes any arguments, so i
 
 ```Rust
 #![no_main]
-
-valida_rs::entrypoint!main(main);
 
 #[no_mangle]
 fn main() {
@@ -102,15 +120,6 @@ For a starting point to build a project using the Rust Valida toolchain, please 
 it as a starting point for your project.
 
 The template project depends on [the valida-rs crate](https://github.com/lita-xyz/valida-rs). This contains a macro for generating an entry point, and some custom versions of standard library functions.
-
-For projects with dependencies on `io` or `rand`, make sure your `main` and `Cargo.toml` include the code in this template. Also, make sure you have the same `.cargo/config.toml` in your project. If you want to build the project not targeting Valida, remove the `[build]` section in `.cargo/config.toml` and `cargo` will build the project targeting the host machine, unless otherwise specified.
-
-We edited some functions to make them compatible with the Valida VM. When using these, the default Rust functions won't work. We call the Valida version with the `entrypoint::` prefix.
-
-* `io`: Valida only supports standard `io` to the extent of `stdin` and `stdout`. To use `println` in Valida, one needs to call `entrypoint::io::println` as in `my-project`. A better `io` library will be added later.
-* `rand`: to ensure the VM can prove the calculation of a given random number, we use our own function to generate a random byte with a specific seed.
-
-These implementations are in `valida-rs/src/io.rs` and `valida-rs/src/rand.rs`. 
 
 ## Compiling and running C programs
 
