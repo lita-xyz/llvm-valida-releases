@@ -37,7 +37,7 @@ docker run --platform linux/amd64 -it --rm -v $(realpath .):/src ghcr.io/lita-xy
 # You are now in a shell with the valida rust toolchain installed!
 ```
 
-## Non-Docker-Based Installation (x86_64 Linux only)
+# Non-Docker-Based Installation (x86_64 Linux only)
 
 For instructions for installation on certain x86_64 Linux platforms, such as Ubuntu 24.04 LTS or later, see [the release notes for the latest release](https://github.com/lita-xyz/valida-releases/releases/tag/v0.7.0-alpha).
 
