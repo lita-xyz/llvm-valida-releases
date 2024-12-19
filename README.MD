@@ -27,12 +27,12 @@ To install and use the toolchain via Docker on a 64-bit computer with an ARM64-c
 
 ```bash
 # Download the container
-docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha
+docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha-arm64
 
 # cd your-valida-project
 
 # Enter the container:
-docker run --platform linux/amd64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha
+docker run --platform linux/arm64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha-arm64
 
 # You are now in a shell with the valida rust toolchain installed!
 ```
