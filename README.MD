@@ -89,19 +89,19 @@ cargo +valida build
 5. Run the code (taking input from `stdin`):
 
 ```
-valida> valida run --fast target/delendum-unknown-baremetal-gnu/debug/fibonacci log
+valida run --fast target/valida-unknown-baremetal-gnu/debug/fibonacci log
 ```
 
 6. Prove the execution (taking input from `stdin`):
 
 ```
-valida> valida prove target/delendum-unknown-baremetal-gnu/debug/fibonacci proof
+valida prove target/valida-unknown-baremetal-gnu/debug/fibonacci proof
 ```
 
 7. Verify the proof:
 
 ```
-valida verify target/delendum-unknown-baremetal-gnu/debug/fibonacci proof
+valida verify target/valida-unknown-baremetal-gnu/debug/fibonacci proof --claimed-output log
 ```
 
 ## Writing Rust programs to run on Valida
@@ -125,6 +125,10 @@ it as a starting point for your project.
 
 The template project depends on [the valida-rs crate](https://github.com/lita-xyz/valida-rs). This contains a macro for generating an entry point, and some custom versions of standard library functions.
 
+### More examples in Rust
+
+If you have installed the toolchain, see `/valida-toolchain/examples/rust` for some more examples of Rust Valida projects.
+
 ## Compiling and running C programs
 
 To enter the Valida shell, run:
@@ -135,19 +139,21 @@ valida-shell
 
 **You can skip the above step if you are using the Docker toolchain.**
 
-See [the lita-xyz/valida-c-examples repo on Github](https://github.com/lita-xyz/valida-c-examples) for some examples of C programs which can be compiled and run on Valida. Here is an example C program from this repo, called `cat.c`:
+If you have installed the toolchain, then see `/valida-toolchain/examples/c` for some examples of C programs which can be compiled and run on Valida. Here is an example C program from this repo, called `cat.c`:
 
 ```c
+#include <stdio.h>
+
 const unsigned EOF = 0xFFFFFFFF;
 
 int main() {
     unsigned c = 0;
     while (1) {
-        c = __builtin_delendum_read_advice();
+        c = getchar();
         if (c == EOF) {
             break;
         } else {
-            __builtin_delendum_write(c);
+            putchar(c);
         }
     }
 }
@@ -156,8 +162,8 @@ int main() {
 To compile, for example, the `cat.c` example, from within the Valida shell:
 
 ```bash
-clang -target delendum ./cat.c -o cat
-valida run cat log
+clang -target valida ./cat.c -o cat
+valida run --fast cat log
 ```
 
 Once running, the cat example will wait for input. After you are done providing input, press `ctrl+D`. The program should echo back what you wrote, writing its output to log.
@@ -165,8 +171,8 @@ Once running, the cat example will wait for input. After you are done providing 
 Compiling and running the other examples follows the same procedure, substituting `$NAME` for the name of the example:
 
 ```bash
-clang -target delendum ./examples/${NAME}.c -o ${NAME}
-valida run ${NAME} log
+clang -target valida ./examples/${NAME}.c -o ${NAME}
+valida run --fast ${NAME} log
 ```
 
 Some other examples that are provided in the `valida-c-examples` repo:
@@ -185,5 +191,4 @@ If you have any issues to report, please report them at [the llvm-valida-release
 # Known issues
 
  * The prover is unsound, which means that verifying a proof does not provide completely convincing evidence that the statement being proven is true. This will be resolved once some missing constraints are added.
- * Code which assumes that memory is initialized to zero might not work properly. This includes `realloc` in the C standard library. This will be resolved by updating the VM to treat uninitialized memory as having a value of zero.
- * The compiler might emit incorrect code for some 64-bit arithmetic operations. This will be resolved by adding appropriate tests and fixing any issues that come up.
+ * There are some issues with standard I/O functions in Rust when it comes to the behavior of interactive programs. Sometimes, code behaves differently in Valida vs native code, such as sometimes needing ctrl+D to be pressed twice instead of once to signal end of input.
