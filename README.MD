@@ -1,3 +1,11 @@
+# Welcome to Valida!
+
+This repository provides the binary release of the Valida toolchain, designed to enable developers to build, run, and prove programs using the Valida zkVM. Whether you're working in Rust or C, the Valida toolchain makes it easy to compile your code, generate proofs of execution, and verify them. This release supports multiple platforms, including x86 and ARM64, with Docker-based installation as the primary installation method for non-x86 platforms.
+
+Dive into the sections below to learn how to install, use, and report any issues with the Valida toolchain.
+
+---
+
 See 'Releases' section for downloads.
 
 # Docker-Based Installation
