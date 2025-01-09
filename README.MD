@@ -19,12 +19,12 @@ To install and use the toolchain via Docker on a 64-bit computer with an Intel-c
 
 ```bash
 # Download the container
-docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha-amd64
+docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.1-alpha-amd64
 
 # cd your-valida-project
 
 # Enter the container:
-docker run --platform linux/amd64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha-amd64
+docker run --platform linux/amd64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.1-alpha-amd64
 
 # You are now in a shell with the valida rust toolchain installed!
 ```
@@ -35,19 +35,19 @@ To install and use the toolchain via Docker on a 64-bit computer with an ARM64-c
 
 ```bash
 # Download the container
-docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha-arm64
+docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.1-alpha-arm64
 
 # cd your-valida-project
 
 # Enter the container:
-docker run --platform linux/arm64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.0-alpha-arm64
+docker run --platform linux/arm64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.1-alpha-arm64
 
 # You are now in a shell with the valida rust toolchain installed!
 ```
 
 # Non-Docker-Based Installation (x86_64 Linux only)
 
-For instructions for installation on certain x86_64 Linux platforms, such as Ubuntu 24.04 LTS or later, see [the release notes for the latest release](https://github.com/lita-xyz/valida-releases/releases/tag/v0.7.0-alpha).
+For instructions for installation on certain x86_64 Linux platforms, such as Ubuntu 24.04 LTS or later, see [the release notes for the latest release](https://github.com/lita-xyz/valida-releases/releases/tag/v0.7.1-alpha).
 
 # Usage instructions
 
