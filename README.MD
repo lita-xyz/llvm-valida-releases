@@ -19,12 +19,12 @@ To install and use the toolchain via Docker on a 64-bit computer with an Intel-c
 
 ```bash
 # Download the container
-docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.1-alpha-amd64
+docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.8.0-alpha-amd64
 
 # cd your-valida-project
 
 # Enter the container:
-docker run --platform linux/amd64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.1-alpha-amd64
+docker run --platform linux/amd64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.8.0-alpha-amd64
 
 # You are now in a shell with the valida rust toolchain installed!
 ```
@@ -35,19 +35,19 @@ To install and use the toolchain via Docker on a 64-bit computer with an ARM64-c
 
 ```bash
 # Download the container
-docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.1-alpha-arm64
+docker pull ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.8.0-alpha-arm64
 
 # cd your-valida-project
 
 # Enter the container:
-docker run --platform linux/arm64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.7.1-alpha-arm64
+docker run --platform linux/arm64 -it --rm -v $(realpath .):/src ghcr.io/lita-xyz/llvm-valida-releases/valida-build-container:v0.8.0-alpha-arm64
 
 # You are now in a shell with the valida rust toolchain installed!
 ```
 
 # Non-Docker-Based Installation (x86_64 Linux only)
 
-For instructions for installation on certain x86_64 Linux platforms, such as Ubuntu 24.04 LTS or later, see [the release notes for the latest release](https://github.com/lita-xyz/valida-releases/releases/tag/v0.7.1-alpha).
+For instructions for installation on certain x86_64 Linux platforms, such as Ubuntu 24.04 LTS or later, see [the release notes for the latest release](https://github.com/lita-xyz/valida-releases/releases/tag/v0.8.0-alpha).
 
 # Usage instructions
 
@@ -109,45 +109,96 @@ valida prove target/valida-unknown-baremetal-gnu/debug/fibonacci proof
 7. Verify the proof:
 
 ```
-valida verify target/valida-unknown-baremetal-gnu/debug/fibonacci proof --claimed-output log
+valida verify target/valida-unknown-baremetal-gnu/debug/fibonacci proof log
 ```
 
 ## Writing Rust programs to run on Valida
 
-The Valida Rust compiler can currently compile in `no_std` mode, I.E. it cannot yet provide access to the `std` library, but can compile Rust programs which only use functionality contained within `core`, and which are annotated as `#![no_std]`.
+For a starting point to build a project using the Rust Valida toolchain, please take a look at
+[the template project](https://github.com/lita-xyz/fibonacci). You can clone this repo and use
+it as a starting point for your project. You should be able to write Rust programs more or less
+as normal. There are a few limitations to keep in mind:
 
-We do not (yet) support a main function signature that takes any arguments, so it's not possible to follow the normal method of specifying a main function in a `#![no_std]` program. The following is a demonstration of a simple program that shows how the main function must be declared instead:
+ * All of the usual operating system facilities are unavailable, except for standard in (`stdin`)
+   and standard out (`stdout`). So for example, there is no access to command line arguments,
+   environment variables, networking, or the filesystem.
+ * Multi-threading is not supported.
+ * Interactive programs may not work as expected.
 
-```Rust
-#![no_main]
+### An example
 
-#[no_mangle]
-fn main() {
-   ...
+Here is an example program using Valida, which computes Fibonacci numbers:
+
+```c
+use std::io::stdin;
+
+pub fn main() {
+    println!("Please enter a number from 0 to 46:");
+    let n = loop {
+        let mut input = String::new();
+        // Read a line from stdin and parse it as an u8.
+        match stdin().read_line(&mut input) {
+            Ok(_) => {
+                match input.trim().parse::<u8>() {
+                    Ok(num) => {
+                        if num == 0 {
+                            println!("The 0th fibonacci number is: 0");
+                            return;
+                        } else if num > 46 {
+                            println!("Error: n is too large. Please enter a number no larger than 46.");
+                        } else {
+                            break num;
+                        }
+                    },
+                    Err(e) => {
+                        println!("Error reading input: {}. Please try again:", e);
+                    }
+                }
+            }
+            Err(e) => {
+                println!("Error reading input: {}. Please try again:", e);
+            }
+        }
+    };
+    let mut a: u32 = 0;
+    let mut b: u32 = 1;
+    let mut sum: u32;
+    for _ in 1..n {
+        sum = a + b;
+        a = b;
+        b = sum;
+    }
+    println!("The {}-th fibonacci number is: {}", n, b);
 }
 ```
 
-For a starting point to build a project using the Rust Valida toolchain, please take a look at
-[the template project](https://github.com/lita-xyz/fibonacci). You can clone this repo and use
-it as a starting point for your project.
-
-The template project depends on [the valida-rs crate](https://github.com/lita-xyz/valida-rs). This contains a macro for generating an entry point, and some custom versions of standard library functions.
-
 ### More examples in Rust
+
+The following examples are available under `/valida-toolchain/examples/rust`:
+ * `conway`: Conway's game of life
+ * `ed25519`: ECDSA Ed25519 signature verification
+ * `factorial`: The factorial function
+ * `fibonacci`: The Fibonacci sequence
+ * `fizzbuzz`: The classic fizz-buzz interview problem
+ * `grep`: Search text for a substring
+ * `guessing_game`: An interactive number guessing example
+ * `hello_world`: The classic "hello world" example
+ * `json_contains`: JSON parsing and property fetching
+ * `palindrome`: Test if a string is a palindrome
+ * `prime_factorization`: Check prime factorization
+ * `secp256k1`: ECDSA Secp256k1 signature verification
+ * `sha256`: SHA-256 hashing
+ * `simple_calculator`: A simple calculator app
+ * `sudoku`: Checking solutions to Sudoku problems
+ * `unit_tests`: A suite of tests of basic language functionality
+
+The [reva](https://github.com/lita-xyz/reva) example executes Ethereum blocks in Valida. This is a work in progress and may produce results that are incorrect. This is plausibly the most complex program that has been run in Valida so far.
 
 If you have installed the toolchain, see `/valida-toolchain/examples/rust` for some more examples of Rust Valida projects.
 
 ## Compiling and running C programs
 
-To enter the Valida shell, run:
-
-```bash
-valida-shell
-```
-
-**You can skip the above step if you are using the Docker toolchain.**
-
-If you have installed the toolchain, then see `/valida-toolchain/examples/c` for some examples of C programs which can be compiled and run on Valida. Here is an example C program from this repo, called `cat.c`:
+See `/valida-toolchain/examples/c/` for some examples of C programs which can be compiled and run on Valida. Here is an example C program from this release bundle, called `/valida-toolchain/examples/c/cat.c`:
 
 ```c
 #include <stdio.h>
@@ -167,11 +218,11 @@ int main() {
 }
 ```
 
-To compile, for example, the `cat.c` example, from within the Valida shell:
+To compile, for example, the `cat.c` example, after installing the toolchain, and with the toolchain on your `PATH` (such as, in the `valida-shell` or in the Docker container shell):
 
 ```bash
-clang -target valida ./cat.c -o cat
-valida run --fast cat log
+clang -target valida /valida-toolchain/examples/c/cat.c -o cat
+valida run cat log
 ```
 
 Once running, the cat example will wait for input. After you are done providing input, press `ctrl+D`. The program should echo back what you wrote, writing its output to log.
@@ -179,11 +230,11 @@ Once running, the cat example will wait for input. After you are done providing 
 Compiling and running the other examples follows the same procedure, substituting `$NAME` for the name of the example:
 
 ```bash
-clang -target valida ./examples/${NAME}.c -o ${NAME}
-valida run --fast ${NAME} log
+clang -target valida /valida-toolchain/examples/${NAME}.c -o ${NAME}
+valida run ${NAME} log
 ```
 
-Some other examples that are provided in the `valida-c-examples` repo:
+Some other C examples that are provided in this release bundle:
 
  * `reverse.c` will output its reversed input.
  * `checksum.c` will output a checksum, i.e., a sum of the characters, of its input.
@@ -191,6 +242,20 @@ Some other examples that are provided in the `valida-c-examples` repo:
     * For an example proof you can use as input, see `examples/example-merkle-proof`
  * `sha256.c` will output a SHA-256 hash of the first 256 bytes of its input.
  * `sha256_32byte_in.c` will output the SHA-256 hash of a constant array of 32 bytes. This is used as a benchmark.
+
+### Using `libc`
+
+There is a partial `libc` for Valida, bundled with this release. This `libc` is a version of [LLVM `libc`](https://libc.llvm.org/).
+
+There is an example, `/valida-toolchain/examples/cat-alpha.c`, which makes use of this `libc`. This example echoes all of the alphabetic characters in its input. It makes use of the `libc` function `isalpha`. The following commands, run from this directory, should compile and run this example:
+
+```bash
+clang -target valida /valida-toolchain/examples/cat-alpha.c -o cat-alpha
+valida run cat-alpha log
+```
+
+[See the docs for more details](https://lita.gitbook.io/lita-documentation/usage/using-llvm-libc) on using the bundled version of `libc` for Valida.
+
 
 # Reporting issues
 
@@ -200,3 +265,4 @@ If you have any issues to report, please report them at [the llvm-valida-release
 
  * The prover is unsound, which means that verifying a proof does not provide completely convincing evidence that the statement being proven is true. This will be resolved once some missing constraints are added.
  * There are some issues with standard I/O functions in Rust when it comes to the behavior of interactive programs. Sometimes, code behaves differently in Valida vs native code, such as sometimes needing ctrl+D to be pressed twice instead of once to signal end of input.
+ * Some Rust programs are compiled incorrectly when compiled to Valida in release mode.
